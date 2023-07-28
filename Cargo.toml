@@ -14,9 +14,9 @@ name = "animal_facts_api"
 path = "src/lib.rs"
 
 [dependencies]
-actix-web = { version = "4", features = ["openssl"] }
+actix-web = "4.2.1"
 actix-rt = "~2.7"
-actix-http = "~3.0"
+# actix-http = "~3.0"
 log = "~0.4.0"
 env_logger = "~0.9"
 failure = "~0.1"

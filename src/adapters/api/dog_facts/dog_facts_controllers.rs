@@ -10,6 +10,9 @@ use crate::{
     domain::{dog_fact_entity::DogFactEntity, error::ApiError},
 };
 use actix_web::{get, web, HttpResponse};
+use actix_web::body::BoxBody;
+use actix_web::dev::Response;
+
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_all_dog_facts).service(get_one_dog_fact_by_id);
@@ -17,12 +20,15 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
 
 #[get("/")]
 async fn get_all_dog_facts(data: web::Data<AppState>) -> Result<HttpResponse, ErrorReponse> {
-    let get_all_dog_facts_usecase = GetAllDogFactsUseCase::new(&data.dogs_repository);
-    let dog_facts: Result<Vec<DogFactEntity>, ApiError> = get_all_dog_facts_usecase.execute().await;
+//    let get_all_dog_facts_usecase = GetAllDogFactsUseCase::new(&data.dogs_repository);
+//    let dog_facts: Result<Vec<DogFactEntity>, ApiError> = get_all_dog_facts_usecase.execute().await;
+//
+//    dog_facts
+//        .map_err(ErrorReponse::map_io_error)
+//        .map(|facts| HttpResponse::Ok().json(facts.into_iter().map(DogFactPresenterMapper::to_api).collect::<Vec<DogFactPresenter>>()))
 
-    dog_facts
-        .map_err(ErrorReponse::map_io_error)
-        .map(|facts| HttpResponse::Ok().json(facts.into_iter().map(DogFactPresenterMapper::to_api).collect::<Vec<DogFactPresenter>>()))
+    //Ok(HttpResponse::with_body(, BoxBody::new("qwe")))
+    Ok(HttpResponse::Ok().body(BoxBody::new("qwe")))
 }
 
 #[get("/{fact_id}")]
