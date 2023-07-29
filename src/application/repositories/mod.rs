@@ -1,1 +1,1 @@
-pub mod cat_facts_repository_abstract;
+pub mod repository_abstract;

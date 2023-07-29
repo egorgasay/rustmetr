@@ -5,12 +5,12 @@ use crate::adapters::{
     api::app_state::AppState,
     spi::{
         db::{db_connection::DbConnection},
-        http::{http_cat_facts_repository::CatFactsRepository, http_connection::HttpConnection},
+        http::{http_repository::Repository, http_connection::HttpConnection},
     },
 };
 use actix_web::{dev::Server, middleware::Logger};
 use actix_web::{web, App, HttpServer};
-use crate:: application::usecases::{get_all_cat_facts_usecase::UseCase, get_one_random_cat_fact_usecase::GetOneRandomCatFactUseCase};
+use crate:: application::usecases::usecase::UseCase;
 
 
 pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::Error> {
@@ -21,12 +21,12 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
 
     let db_connection = DbConnection { db_name: db_name.to_string() };
     let http_connection = HttpConnection {};
-    let repo = &CatFactsRepository {
+    let repo = &Repository {
         http_connection,
         source: dotenv::var("CATS_SOURCE").expect("CATS_SOURCE must be set"),
     };
 
-    let static_reference: &'static CatFactsRepository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
+    let static_reference: &'static Repository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
 
     let data = web::Data::new(AppState {
         app_name: String::from("Animal Facts API"),
