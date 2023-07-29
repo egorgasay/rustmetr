@@ -49,4 +49,10 @@ impl CatFactsRepositoryAbstract for CatFactsRepository {
             Err(e) => Err(Box::new(e)),
         }
     }
+
+    async fn save(&self, metric_name: String, value: i32) -> Option<String> {
+        println!("hello from storage with {}: {}", metric_name, value);
+
+        None
+    }
 }

@@ -1,5 +1,5 @@
-use crate::adapters::api::cat_facts::cat_facts_payloads::CatFactPayload;
-use crate::adapters::api::cat_facts::cat_facts_presenters::CatFactPresenter;
+use crate::adapters::api::cat_facts_payloads::CatFactPayload;
+use crate::adapters::api::cat_facts_presenters::CatFactPresenter;
 use crate::application::mappers::api_mapper::ApiMapper;
 use crate::domain::cat_fact_entity::CatFactEntity;
 

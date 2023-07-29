@@ -5,18 +5,26 @@ use crate::{
     domain::{cat_fact_entity::CatFactEntity, error::ApiError},
 };
 
-pub struct GetAllCatFactsUseCase<'a> {
+pub struct UseCase<'a> {
     repository: &'a dyn CatFactsRepositoryAbstract,
 }
 
-impl<'a> GetAllCatFactsUseCase<'a> {
+impl<'a> UseCase<'a> {
     pub fn new(repository: &'a dyn CatFactsRepositoryAbstract) -> Self {
-        GetAllCatFactsUseCase { repository }
+        UseCase { repository }
+    }
+
+    pub async fn save(&self, metric_name: String, value: i32) -> Option<String> {
+        println!("hi from usecase");
+        self.repository.save(metric_name, value).await;
+        Some("".to_string())
     }
 }
 
+
+
 #[async_trait(?Send)]
-impl<'a> AbstractUseCase<Vec<CatFactEntity>> for GetAllCatFactsUseCase<'a> {
+impl<'a> AbstractUseCase<Vec<CatFactEntity>> for UseCase<'a> {
     async fn execute(&self) -> Result<Vec<CatFactEntity>, ApiError> {
         let cat_facts = self.repository.get_all_cat_facts().await;
 
@@ -25,6 +33,7 @@ impl<'a> AbstractUseCase<Vec<CatFactEntity>> for GetAllCatFactsUseCase<'a> {
             Err(e) => Err(ErrorHandlingUtils::application_error("Cannot get all cat facts", Some(e))),
         }
     }
+
 }
 
 #[cfg(test)]
@@ -45,7 +54,7 @@ mod tests {
             .returning(|| Err(Box::new(Error::new(ErrorKind::Other, "oh no!"))));
 
         // when calling usecase
-        let get_all_cat_facts_usecase = GetAllCatFactsUseCase::new(&cat_fact_repository);
+        let get_all_cat_facts_usecase = UseCase::new(&cat_fact_repository);
         let data = get_all_cat_facts_usecase.execute().await;
 
         // then exception
@@ -61,7 +70,7 @@ mod tests {
         cat_fact_repository.expect_get_all_cat_facts().with().times(1).returning(|| Ok(Vec::<CatFactEntity>::new()));
 
         // when calling usecase
-        let get_all_cat_facts_usecase = GetAllCatFactsUseCase::new(&cat_fact_repository);
+        let get_all_cat_facts_usecase = UseCase::new(&cat_fact_repository);
         let data = get_all_cat_facts_usecase.execute().await.unwrap();
 
         // then assert the result is an empty list
@@ -86,7 +95,7 @@ mod tests {
         });
 
         // when calling usecase
-        let get_all_cat_facts_usecase = GetAllCatFactsUseCase::new(&cat_fact_repository);
+        let get_all_cat_facts_usecase = UseCase::new(&cat_fact_repository);
         let data = get_all_cat_facts_usecase.execute().await.unwrap();
 
         // then assert the result is an empty list
