@@ -12,6 +12,7 @@ use crate::{
     },
 };
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 pub struct Repository {
     pub http_connection: HttpConnection,

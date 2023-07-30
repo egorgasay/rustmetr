@@ -13,6 +13,7 @@ use actix_web::{web, App, HttpServer};
 use crate:: application::usecases::usecase::UseCase;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::sync::RwLock;
 
 
 pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::Error> {
@@ -31,10 +32,10 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
 
     let static_reference: &'static mut Repository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
     let logic = UseCase::new(static_reference);
-    let mut data = web::Data::new(Mutex::new(AppState {
+    let mut data = web::Data::new(AppState {
         app_name: String::from("Animal Facts API"),
-        logic: logic,
-    }));
+        logic: Mutex::new(logic),
+    });
 
     let port = listener.local_addr().unwrap().port();
 
