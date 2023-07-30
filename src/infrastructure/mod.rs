@@ -11,6 +11,8 @@ use crate::adapters::{
 use actix_web::{dev::Server, middleware::Logger};
 use actix_web::{web, App, HttpServer};
 use crate:: application::usecases::usecase::UseCase;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 
 pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::Error> {
@@ -21,17 +23,18 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
 
     let db_connection = DbConnection { db_name: db_name.to_string() };
     let http_connection = HttpConnection {};
-    let repo = &Repository {
+    let mut repo = &Repository {
+        map: HashMap::new(),
         http_connection,
         source: dotenv::var("CATS_SOURCE").expect("CATS_SOURCE must be set"),
     };
 
-    let static_reference: &'static Repository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
-
-    let data = web::Data::new(AppState {
+    let static_reference: &'static mut Repository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
+    let logic = UseCase::new(static_reference);
+    let mut data = web::Data::new(Mutex::new(AppState {
         app_name: String::from("Animal Facts API"),
-        logic: UseCase::new(static_reference),
-    });
+        logic: logic,
+    }));
 
     let port = listener.local_addr().unwrap().port();
 
