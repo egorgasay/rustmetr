@@ -1,43 +1,32 @@
-use std::env;
-use std::net::TcpListener;
+use animal_facts_api::adapters::{
+    self,
+    api::controllers::get_metric,
+    api::app_state::AppState,
+    spi::{
+        db::{db_connection::DbConnection},
+        http::{http_repository::Storage, http_connection::HttpConnection},
+    },
+};
 
-use animal_facts_api::run;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder,
+    middleware::Logger};
+use std::collections::HashMap;
+use std::sync::Mutex;
+use animal_facts_api::application::usecases::usecase::UseCase;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let environment_file;
-    if let Ok(e) = env::var("ENV") {
-        environment_file = format!(".env.{}", e);
-    } else {
-        environment_file = String::from(".env");
-    }
 
-    dotenv::from_filename(environment_file).ok();
+   let storage = Storage::new();
+   let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(storage))) };
+   let logic = web::Data::new(UseCase::new(static_reference));
 
-    let listener = TcpListener::bind("0.0.0.0:8888").expect("Failed to bind random port");
-    let database_name = dotenv::var("DATABASE_NAME").expect("DATABASE_NAME must be set");
-
-    run(listener, &database_name)?.await
+   println!("started on 6789");
+   HttpServer::new(move || {
+       App::new().app_data(logic.clone())
+           .wrap(Logger::default()).configure(adapters::api::routes::routes)
+   })
+   .bind("127.0.0.1:6789")?
+   .run()
+   .await
 }
-
-//
-//use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-//use std::collections::HashMap;
-//use std::sync::Mutex;
-//
-//#[actix_web::main]
-//async fn main() -> std::io::Result<()> {
-//    let storage = Storage::new();
-//    let logic = web::Data::new(UseCase::new(storage));
-//
-//    HttpServer::new(move || {
-//        App::new()
-//            .app_data(logic.clone())
-//            .service(get_metric)
-//            .service(update_gauge)
-//            .service(update_counter)
-//    })
-//    .bind("127.0.0.1:8888")?
-//    .run()
-//    .await
-//}

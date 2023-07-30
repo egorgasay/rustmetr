@@ -2,7 +2,7 @@ use crate::application::mappers::api_mapper::ApiMapper;
 use crate::application::usecases::usecase::UseCase;
 use crate::{
     adapters::api::{
-        app_state::AppState,
+        //app_state::UseCase,
         error_presenter::ErrorReponse,
     }
 };
