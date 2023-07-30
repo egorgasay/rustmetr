@@ -7,8 +7,9 @@ use std::error::Error;
 #[cfg_attr(test, automock)]
 #[async_trait(?Send)]
 pub trait RepositoryAbstract: Send + Sync {
-    fn get(&self, metric: String) -> Result<String, String>;
+    fn get(&self, metric: String) -> Result<f32, String>;
     fn set(&self, metric: String, value: f32) -> Result<String, String>;
+    fn inc(&self, metric: String, value: i32) -> Result<String, String>;
 }
 //
 //#[cfg_attr(test, automock)]

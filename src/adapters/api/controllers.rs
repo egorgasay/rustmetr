@@ -20,7 +20,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
 async fn get_metric(logic: web::Data<UseCase<'_>>, k: web::Path<(String,)>) -> impl Responder {
     let kk = k.into_inner();
     match logic.get_metric(kk.0) {
-        Ok(value) => HttpResponse::Ok().body(value),
+        Ok(value) => HttpResponse::Ok().body(value.to_string()),
         Err(err) => HttpResponse::NotFound().body(err),
     }
 }
@@ -38,7 +38,7 @@ async fn update_gauge(logic: web::Data<UseCase<'_>>, path: web::Path<(String,Str
     }
 
     match logic.update_gauge(key, value) {
-        Ok(value) => HttpResponse::Ok().body(value),
+        Ok(..) => HttpResponse::Ok().body("completed successfully"),
         Err(err) => HttpResponse::NotFound().body(err),
     }
 }
@@ -61,7 +61,7 @@ async fn update_counter(logic: web::Data<UseCase<'_>>, path: web::Path<(String,S
     }
 
     match logic.update_counter(key, value) {
-        Ok(value) => HttpResponse::Ok().body(value),
+        Ok(value) => HttpResponse::Ok().body("completed successfully"),
         Err(err) => HttpResponse::NotFound().body(err),
     }
 }

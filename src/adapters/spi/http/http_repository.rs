@@ -27,15 +27,25 @@ impl Storage {
 }
 
 impl RepositoryAbstract for Storage {
-    fn get(&self, metric: String) -> Result<String, String> {
+    fn get(&self, metric: String) -> Result<f32, String> {
         match self.data.lock().unwrap().get(&metric.to_owned()) {
-            Some(value) => Ok(value.to_string()),
+            Some(value) => Ok(*value),
             None => Err("metric not found".to_string()),
         }
     }
 
     fn set(&self, metric: String, value: f32) -> Result<String, String> {
         self.data.lock().unwrap().insert(metric, value);
+        Ok("".to_string())
+    }
+
+    fn inc(&self, metric: String, value: i32) -> Result<String, String> {
+        let val :f32 = match self.get(metric.clone()) { // TODO: use &metric??
+            Ok(v) => v,
+            Err(..) => 0.0,
+        };
+
+        self.data.lock().unwrap().insert(metric, val + (value as f32));
         Ok("".to_string())
     }
 }

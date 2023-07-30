@@ -22,7 +22,7 @@ impl<'a> UseCase<'_> {
         }
     }
 
-    pub fn get_metric(&self, metric: String) -> Result<String, String> {
+    pub fn get_metric(&self, metric: String) -> Result<f32, String> {
         match self.repository.get(metric) {
             Ok(value) => Ok(value),
             Err(err) => Err(err),
@@ -37,7 +37,7 @@ impl<'a> UseCase<'_> {
     }
 
     pub fn update_counter(&self, metric: String, value: i32) -> Result<String, String> {
-        match self.repository.set(metric, value as f32) {
+        match self.repository.inc(metric, value) {
             Ok(value) => Ok(value),
             Err(err) => Err(err),
         }
