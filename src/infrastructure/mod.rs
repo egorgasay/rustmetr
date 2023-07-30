@@ -5,12 +5,13 @@ use crate::adapters::{
     api::app_state::AppState,
     spi::{
         db::{db_connection::DbConnection},
-        http::{http_repository::Repository, http_connection::HttpConnection},
+        http::{http_repository::Storage, http_connection::HttpConnection},
     },
 };
 use actix_web::{dev::Server, middleware::Logger};
 use actix_web::{web, App, HttpServer};
-use crate:: application::usecases::usecase::UseCase;
+use crate::application::usecases::usecase::UseCase;
+use crate::application::repositories::repository_abstract::RepositoryAbstract;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::sync::RwLock;
@@ -22,24 +23,19 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
 
     env_logger::try_init();
 
-    let db_connection = DbConnection { db_name: db_name.to_string() };
     let http_connection = HttpConnection {};
-    let mut repo = &Repository {
-        map: HashMap::new(),
-        http_connection,
-        source: dotenv::var("CATS_SOURCE").expect("CATS_SOURCE must be set"),
-    };
+    let repo = &Storage::new();
 
-    let static_reference: &'static mut Repository = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
+    let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
     let logic = UseCase::new(static_reference);
-    let mut data = web::Data::new(AppState {
-        app_name: String::from("Animal Facts API"),
-        logic: Mutex::new(logic),
-    });
+//    let mut data = web::Data::new(AppState {
+//        app_name: String::from("Animal Facts API"),
+//        logic: logic,
+//    });
 
     let port = listener.local_addr().unwrap().port();
 
-    let server = HttpServer::new(move || App::new().app_data(data.clone()).wrap(Logger::default()).configure(adapters::api::routes::routes))
+    let server = HttpServer::new(move || App::new().app_data(logic.clone()).wrap(Logger::default()).configure(adapters::api::routes::routes))
         .listen(listener)?
         .run();
 

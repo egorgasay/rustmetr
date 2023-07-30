@@ -12,19 +12,30 @@ use crate::{
     },
 };
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-
-pub struct Repository {
-    pub http_connection: HttpConnection,
-    pub source: String,
-    pub map: HashMap<String, (i32, i32)>,
+use std::sync::Mutex;
+// Структура для хранения данных
+pub struct Storage {
+    pub data: Mutex<HashMap<String, f32>>,
 }
 
-#[async_trait(?Send)]
-impl RepositoryAbstract for Repository {
-    fn save(&mut self, metric_name: String, value: (i32, i32)) -> Option<String> {
-        println!("saved in {}", metric_name);
-        self.map.insert(metric_name, value);
-        None
+impl Storage {
+    pub fn new() -> Self {
+        Storage {
+            data: Mutex::new(HashMap::new()),
+        }
+    }
+}
+
+impl RepositoryAbstract for Storage {
+    fn get(&self, metric: String) -> Result<String, String> {
+        match self.data.lock().unwrap().get(&metric.to_owned()) {
+            Some(value) => Ok(value.to_string()),
+            None => Err("metric not found".to_string()),
+        }
+    }
+
+    fn set(&self, metric: String, value: f32) -> Result<String, String> {
+        self.data.lock().unwrap().insert(metric, value);
+        Ok("".to_string())
     }
 }
