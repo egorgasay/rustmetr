@@ -29,7 +29,14 @@ async fn get_metric(logic: web::Data<UseCase<'_>>, k: web::Path<(String,)>) -> i
 async fn update_gauge(logic: web::Data<UseCase<'_>>, path: web::Path<(String,String)>) -> impl Responder {
     let p = path.into_inner();
     let key = p.0;
-    let value: f32 = p.1.parse().unwrap();
+    let mut value: f32 = 0 as f32;
+    match p.1.parse::<f32>() {
+        Ok(n) => value = n,
+        Err(e) => {
+            return HttpResponse::BadRequest().body("bad request".to_string());
+        },
+    }
+
     match logic.update_gauge(key, value) {
         Ok(value) => HttpResponse::Ok().body(value),
         Err(err) => HttpResponse::NotFound().body(err),
@@ -44,7 +51,15 @@ async fn update_counter(logic: web::Data<UseCase<'_>>, path: web::Path<(String,S
     if split.collect::<Vec<_>>().len() > 1 {
         return HttpResponse::BadRequest().body("bad request".to_string());
     }
-    let value: i32 = p.1.parse().unwrap();
+
+    let mut value: i32 = 0;
+    match p.1.parse::<i32>() {
+        Ok(n) => value = n,
+        Err(e) => {
+            return HttpResponse::BadRequest().body("bad request".to_string());
+        },
+    }
+
     match logic.update_counter(key, value) {
         Ok(value) => HttpResponse::Ok().body(value),
         Err(err) => HttpResponse::NotFound().body(err),
