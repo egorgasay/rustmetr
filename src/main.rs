@@ -27,7 +27,7 @@ use std::sync::Mutex;
 
 // Структура для хранения данных
 struct Storage {
-    data: Mutex<HashMap<String, i32>>,
+    data: Mutex<HashMap<String, f32>>,
 }
 
 impl Storage {
@@ -44,7 +44,7 @@ impl Storage {
         }
     }
 
-    fn set(&self, metric: String, value: i32) -> Result<String, String> {
+    fn set(&self, metric: String, value: f32) -> Result<String, String> {
         self.data.lock().unwrap().insert(metric, value);
         Ok("".to_string())
     }
@@ -69,6 +69,13 @@ impl UseCase {
     }
 
     fn update_gauge(&self, metric: String, value: i32) -> Result<String, String> {
+        match self.storage.set(metric, value as f32) {
+            Ok(value) => Ok(value),
+            Err(err) => Err(err),
+        }
+    }
+
+    fn update_counter(&self, metric: String, value: f32) -> Result<String, String> {
         match self.storage.set(metric, value) {
             Ok(value) => Ok(value),
             Err(err) => Err(err),
@@ -90,8 +97,23 @@ async fn get_metric(logic: web::Data<UseCase>, k: web::Path<(String,)>) -> impl 
 async fn update_gauge(logic: web::Data<UseCase>, path: web::Path<(String,String)>) -> impl Responder {
     let p = path.into_inner();
     let key = p.0;
+    let split = p.1.split(".");
+    if split.collect::<Vec<_>>().len() > 1 {
+        return HttpResponse::BadRequest().body("bad request".to_string());
+    }
     let value: i32 = p.1.parse().unwrap();
     match logic.update_gauge(key, value) {
+        Ok(value) => HttpResponse::Ok().body(value),
+        Err(err) => HttpResponse::NotFound().body(err),
+    }
+}
+
+#[post("/update/counter/{key}/{value}")]
+async fn update_counter(logic: web::Data<UseCase>, path: web::Path<(String,String)>) -> impl Responder {
+    let p = path.into_inner();
+    let key = p.0;
+    let value: f32 = p.1.parse().unwrap();
+    match logic.update_counter(key, value) {
         Ok(value) => HttpResponse::Ok().body(value),
         Err(err) => HttpResponse::NotFound().body(err),
     }
@@ -107,6 +129,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(logic.clone())
             .service(get_metric)
             .service(update_gauge)
+            .service(update_counter)
     })
     .bind("127.0.0.1:8888")?
     .run()
