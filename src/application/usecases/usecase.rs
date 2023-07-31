@@ -7,6 +7,9 @@ use crate::{
         utils::error_handling_utils::ErrorHandlingUtils,
     },
     domain::{error::ApiError},
+    errors::logic::*,
+    errors::storage::SetError,
+    errors::storage::GetError,
 };
 
 #[derive(Clone)]
@@ -22,24 +25,69 @@ impl<'a> UseCase<'_> {
         }
     }
 
-    pub fn get_metric(&self, metric: String) -> Result<f32, String> {
+    pub fn get_metric(&self, metric: String) -> Result<f32, GetMetricError> {
         match self.repository.get(metric) {
             Ok(value) => Ok(value),
-            Err(err) => Err(err),
+            Err(err) => match err {
+                GetError => Err(GetMetricError::NotFound),
+                ProblemStorage => Err(GetMetricError::ProblemStorage)
+            },
         }
     }
 
-    pub fn update_gauge(&self, metric: String, value: f32) -> Result<String, String> {
+    fn update_gauge(&self, metric: String, value: f32) -> Option<UpdateError> {
         match self.repository.set(metric, value) {
-            Ok(value) => Ok(value),
-            Err(err) => Err(err),
+            Some(err) => {
+                match err {
+                    ProblemStorage => Some(UpdateError::ProblemStorage)
+                }
+            },
+            None => None,
         }
     }
 
-    pub fn update_counter(&self, metric: String, value: i32) -> Result<String, String> {
+    fn update_counter(&self, metric: String, value: i32) -> Option<UpdateError> {
         match self.repository.inc(metric, value) {
-            Ok(value) => Ok(value),
-            Err(err) => Err(err),
+            Some(err) => {
+                match err {
+                    ProblemStorage => Some(UpdateError::ProblemStorage)
+                }
+            }
+            None => None,
+        }
+    }
+
+    pub fn update(&self, metric: String, name: String, value: String) -> Option<UpdateError> {
+        match metric.as_str() {
+            "gauge" => {
+                let mut val: f32 = 0 as f32;
+                match value.parse::<f32>() {
+                    Ok(n) => val = n,
+                    Err(e) => {
+                        return Some(UpdateError::BadFormat);
+                    },
+                };
+
+                match self.update_gauge(name, val) {
+                    Some(err) => Some(err),
+                    None => None,
+                }
+            },
+            "counter" => {
+                let mut val: i32 = 0;
+                match value.parse::<i32>() {
+                    Ok(n) => val = n,
+                    Err(e) => {
+                        return Some(UpdateError::BadFormat);
+                    },
+                };
+
+                match self.update_counter(name, val) {
+                    Some(err) => Some(err),
+                    None => None,
+                }
+            },
+            &_ => Some(UpdateError::UnknownMetric)
         }
     }
 }

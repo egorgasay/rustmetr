@@ -10,6 +10,7 @@ use crate::{
     application::{mappers::http_mapper::HttpMapper,
         repositories::repository_abstract::RepositoryAbstract,
     },
+    errors::storage::*,
 };
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -27,25 +28,26 @@ impl Storage {
 }
 
 impl RepositoryAbstract for Storage {
-    fn get(&self, metric: String) -> Result<f32, String> {
+    fn get(&self, metric: String) -> Result<f32, GetError> {
         match self.data.lock().unwrap().get(&metric.to_owned()) {
             Some(value) => Ok(*value),
-            None => Err("metric not found".to_string()),
+            None => Err(GetError::NotFound),
         }
     }
 
-    fn set(&self, metric: String, value: f32) -> Result<String, String> {
+    fn set(&self, metric: String, value: f32) -> Option<SetError> {
         self.data.lock().unwrap().insert(metric, value);
-        Ok("".to_string())
+        None
     }
 
-    fn inc(&self, metric: String, value: i32) -> Result<String, String> {
+    fn inc(&self, metric: String, value: i32) -> Option<IncError> {
         let val :f32 = match self.get(metric.clone()) { // TODO: use &metric??
             Ok(v) => v,
             Err(..) => 0.0,
         };
 
         self.data.lock().unwrap().insert(metric, val + (value as f32));
-        Ok("".to_string())
+
+        None
     }
 }
