@@ -3,7 +3,7 @@ use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use derive_more::Display;
 use serde::Deserialize;
 use serde::Serialize;
-use thiserror::Error;
+// use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ErrorPresenter {
@@ -12,7 +12,7 @@ pub struct ErrorPresenter {
     pub message: String,
 }
 
-#[derive(Error, Debug, Display)]
+#[derive(Debug, Display)]
 #[display(fmt = "{:?}", error)]
 pub struct ErrorReponse {
     status_code: StatusCode,

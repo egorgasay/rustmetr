@@ -2,11 +2,6 @@ use async_trait::async_trait;
 use std::error::Error;
 
 use crate::{
-    adapters::spi::http::{
-        http_connection::HttpConnection,
-       // http_mappers::HTTPMapper,
-        // http_models::{CatFactApiModel, CatFactsApiModel},
-    },
     application::{mappers::http_mapper::HttpMapper,
         repositories::repository_abstract::RepositoryAbstract,
     },
@@ -14,6 +9,7 @@ use crate::{
 };
 use std::collections::HashMap;
 use std::sync::Mutex;
+
 // Структура для хранения данных
 pub struct Storage {
     pub data: Mutex<HashMap<String, f32>>,
@@ -36,6 +32,7 @@ impl RepositoryAbstract for Storage {
     }
 
     fn set(&self, metric: String, value: f32) -> Option<SetError> {
+        println!("set metric: {}, value: {}", metric, value);
         self.data.lock().unwrap().insert(metric, value);
         None
     }
@@ -45,6 +42,7 @@ impl RepositoryAbstract for Storage {
             Ok(v) => v,
             Err(..) => 0.0,
         };
+        println!("inc metric: {}, value: {}", metric, val + (value as f32));
 
         self.data.lock().unwrap().insert(metric, val + (value as f32));
 

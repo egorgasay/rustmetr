@@ -5,18 +5,15 @@ use crate::adapters::{
     api::controllers::get_metric,
     api::app_state::AppState,
     spi::{
-        db::{db_connection::DbConnection},
-        http::{http_repository::Storage, http_connection::HttpConnection},
+        http::{http_connection::HttpConnection},
     },
 };
 use actix_web::{dev::Server, middleware::Logger};
 use actix_web::{web, App, HttpServer};
-use crate::application::usecases::usecase::UseCase;
-use crate::application::repositories::repository_abstract::RepositoryAbstract;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::sync::RwLock;
-
+use crate::application::{
+    usecases::usecase::UseCase,
+    repositories::map::map_storage::Storage
+};
 
 pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::Error> {
     env::set_var("RUST_BACKTRACE", "1");

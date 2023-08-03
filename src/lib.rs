@@ -10,8 +10,8 @@ pub mod infrastructure;
 extern crate dotenv;
 extern crate log;
 
-#[macro_use]
-extern crate diesel;
+// #[macro_use]
+// extern crate diesel;
 extern crate r2d2;
 
 pub fn run(listener: TcpListener, db_name: &str) -> Result<Server, std::io::Error> {

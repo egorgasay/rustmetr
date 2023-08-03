@@ -29,8 +29,7 @@ impl<'a> UseCase<'_> {
         match self.repository.get(metric) {
             Ok(value) => Ok(value),
             Err(err) => match err {
-                GetError => Err(GetMetricError::NotFound),
-                ProblemStorage => Err(GetMetricError::ProblemStorage)
+                GetError::NotFound => Err(GetMetricError::NotFound),
             },
         }
     }

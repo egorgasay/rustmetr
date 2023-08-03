@@ -3,16 +3,14 @@ use rustmetric::adapters::{
     api::controllers::get_metric,
     api::app_state::AppState,
     spi::{
-        db::{db_connection::DbConnection},
-        http::{http_repository::Storage, http_connection::HttpConnection},
+        http::{http_connection::HttpConnection},
     },
 };
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder,
     middleware::Logger};
-use std::collections::HashMap;
-use std::sync::Mutex;
 use rustmetric::application::usecases::usecase::UseCase;
+use rustmetric::application::repositories::map::map_storage::Storage;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
