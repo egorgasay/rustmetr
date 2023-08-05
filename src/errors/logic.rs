@@ -5,6 +5,7 @@ pub enum UpdateError {
     ProblemStorage
 }
 
+#[derive(Debug)]
 pub enum GetMetricError {
     NotFound,
     ProblemStorage

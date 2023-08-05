@@ -31,13 +31,13 @@ impl RepositoryAbstract for Storage {
         }
     }
 
-    fn set(&self, metric: String, value: f32) -> Option<SetError> {
+    fn set(&self, metric: String, value: f32) -> Result<(), SetError> {
         println!("set metric: {}, value: {}", metric, value);
         self.data.lock().unwrap().insert(metric, value);
-        None
+        Ok(())
     }
 
-    fn inc(&self, metric: String, value: i32) -> Option<IncError> {
+    fn inc(&self, metric: String, value: i32) -> Result<(), IncError> {
         let val :f32 = match self.get(metric.clone()) { // TODO: use &metric??
             Ok(v) => v,
             Err(..) => 0.0,
@@ -46,6 +46,6 @@ impl RepositoryAbstract for Storage {
 
         self.data.lock().unwrap().insert(metric, val + (value as f32));
 
-        None
+        Ok(())
     }
 }

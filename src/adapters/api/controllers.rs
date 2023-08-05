@@ -37,8 +37,8 @@ async fn update(logic: web::Data<UseCase<'_>>, path: web::Path<(String,String,St
     let value = p.2;
 
     match logic.update(metric, key, value) {
-        None => HttpResponse::Ok().body("completed successfully"),
-        Some(err) => {
+        Ok(_) => HttpResponse::Ok().body("completed successfully"),
+        Err(err) => {
             match err {
                 UpdateError::UnknownMetric => {
                     HttpResponse::BadRequest().body("unknown metric")

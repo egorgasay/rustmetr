@@ -9,15 +9,6 @@ use crate::errors::storage::*;
 #[async_trait(?Send)]
 pub trait RepositoryAbstract: Send + Sync {
     fn get(&self, metric: String) -> Result<f32, GetError>;
-    fn set(&self, metric: String, value: f32) -> Option<SetError>;
-    fn inc(&self, metric: String, value: i32) -> Option<IncError>;
+    fn set(&self, metric: String, value: f32) -> Result<(), SetError>;
+    fn inc(&self, metric: String, value: i32) -> Result<(), IncError>;
 }
-//
-//#[cfg_attr(test, automock)]
-//#[async_trait(?Send)]
-//pub trait ValueAbstract: Send + Sync {
-//    fn add(&mut self, another: &dyn ValueAbstract);
-//}
-
-//
-//unsafe impl Sync for dyn CatFactsRepositoryAbstract {}
