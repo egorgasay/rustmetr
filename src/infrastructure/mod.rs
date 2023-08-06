@@ -1,14 +1,10 @@
 use std::{env, net::TcpListener};
 
 use crate::adapters::{
-    self,
     api::controllers::get_metric,
     api::app_state::AppState,
-    spi::{
-        http::{http_connection::HttpConnection},
-    },
 };
-use actix_web::{dev::Server, middleware::Logger};
+use actix_web::{dev::Server};
 use actix_web::{web, App, HttpServer};
 use crate::application::{
     usecases::usecase::UseCase,

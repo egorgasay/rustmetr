@@ -1,4 +1,4 @@
-use crate::adapters::spi::db::schema::*;
+
 
 // #[derive(Queryable, QueryableByName)]
 // #[table_name = "dog_facts"]

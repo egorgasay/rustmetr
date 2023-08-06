@@ -1,16 +1,12 @@
-use crate::application::mappers::api_mapper::ApiMapper;
+
 use crate::application::usecases::usecase::UseCase;
 use crate::{
-    adapters::api::{
-        //app_state::UseCase,
-        error_presenter::ErrorReponse,
-    },
     errors::logic::*,
 };
-use std::sync::{Mutex, RwLock};
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use actix_web::body::BoxBody;
+
+use actix_web::{get, post, web, HttpResponse, Responder};
+
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_metric).service(update);

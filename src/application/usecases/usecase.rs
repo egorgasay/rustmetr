@@ -1,13 +1,8 @@
-use async_trait::async_trait;
+
 
 use crate::{
-    application::{
-        repositories::repository_abstract::RepositoryAbstract,
-        usecases::interfaces::AbstractUseCase,
-        utils::error_handling_utils::ErrorHandlingUtils,
-    },
-    domain::{error::ApiError},
-    errors::{logic::{*, self}, storage},
+    application::repositories::repository_abstract::RepositoryAbstract,
+    errors::{logic::{*}, storage},
 };
 
 #[derive(Clone)]
@@ -49,10 +44,6 @@ impl<'a> UseCase<'_> {
             Err(err) => {
                 match err {
                     storage::IncError::Internal => Err(UpdateError::ProblemStorage),
-                    other_err => {
-                        println!("{:?}", other_err);
-                        Err(UpdateError::ProblemStorage)
-                    }
                 }
             }
             Ok(_) => Ok(()),
@@ -62,10 +53,10 @@ impl<'a> UseCase<'_> {
     pub fn update(&self, metric: String, name: String, value: String) -> Result<(), UpdateError> {
         match metric.as_str() {
             "gauge" => {
-                let mut val: f32 = 0 as f32;
+                let val: f32;
                 match value.parse::<f32>() {
                     Ok(n) => val = n,
-                    Err(e) => {
+                    Err(_e) => {
                         return Err(UpdateError::BadFormat);
                     },
                 };
@@ -76,10 +67,10 @@ impl<'a> UseCase<'_> {
                 };
             },
             "counter" => {
-                let mut val: i32 = 0;
+                let val: i32;
                 match value.parse::<i32>() {
                     Ok(n) => val = n,
-                    Err(e) => {
+                    Err(_e) => {
                         return Err(UpdateError::BadFormat);
                     },
                 };
@@ -106,7 +97,7 @@ mod tests {
     fn test_update_storage_error() {
         let mut repo = MockRepositoryAbstract::new();
 
-        repo.expect_set().return_once(move |name, value | Err(storage::SetError::Internal));
+        repo.expect_set().return_once(move |_name, _value | Err(storage::SetError::Internal));
          
         let usecase = UseCase::new(&repo);
         

@@ -2,7 +2,7 @@ use rustmetric::adapters::{
     self,
 };
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder,
+use actix_web::{web, App, HttpServer,
     middleware::Logger};
 use rustmetric::application::usecases::usecase::UseCase;
 use rustmetric::application::repositories::map::map_storage::Storage;

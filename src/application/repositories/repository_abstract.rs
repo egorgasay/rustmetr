@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 #[cfg(test)]
 use mockall::{predicate::*, *};
-use std::error::Error;
+
 use crate::errors::storage::*;
 
 #[cfg_attr(test, automock)]
