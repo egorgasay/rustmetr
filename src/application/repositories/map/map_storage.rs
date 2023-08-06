@@ -7,33 +7,49 @@ use crate::{
     errors::storage::*,
 };
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::RwLock;
 
 // Структура для хранения данных
 pub struct Storage {
-    pub data: Mutex<HashMap<String, f32>>,
+    pub data: RwLock<HashMap<String, f32>>,
 }
 
 impl Storage {
     pub fn new() -> Self {
         Storage {
-            data: Mutex::new(HashMap::new()),
+            data: RwLock::new(HashMap::new()),
         }
     }
 }
 
 impl RepositoryAbstract for Storage {
     fn get(&self, metric: String) -> Result<f32, GetError> {
-        match self.data.lock().unwrap().get(&metric.to_owned()) {
-            Some(value) => Ok(*value),
-            None => Err(GetError::NotFound),
+        match self.data.read() {
+            Ok(data) => {
+                match data.get(&metric.to_owned()) {
+                    Some(value) => Ok(*value),
+                    None => Err(GetError::NotFound),
+                }
+            },
+            Err(err) => {
+                println!("error while getting metric: {}", err.to_string());
+                Err(GetError::Internal)
+            },
         }
     }
 
     fn set(&self, metric: String, value: f32) -> Result<(), SetError> {
         println!("set metric: {}, value: {}", metric, value);
-        self.data.lock().unwrap().insert(metric, value);
-        Ok(())
+        match self.data.write() {
+            Ok(mut data) => {
+                data.insert(metric, value);
+                Ok(())
+            }
+            Err(err) => {
+                println!("error while setting metric: {}", err.to_string());
+                Err(SetError::Internal)
+            }
+        }
     }
 
     fn inc(&self, metric: String, value: i32) -> Result<(), IncError> {
@@ -43,8 +59,15 @@ impl RepositoryAbstract for Storage {
         };
         println!("inc metric: {}, value: {}", metric, val + (value as f32));
 
-        self.data.lock().unwrap().insert(metric, val + (value as f32));
-
-        Ok(())
+        match self.data.write(){
+            Ok(mut data) => {
+                data.insert(metric, val + (value as f32));
+                Ok(())
+            }
+            Err(err) => {
+                println!("error while inc metric: {}", err.to_string());
+                Err(IncError::Internal)
+            }
+        }
     }
 }
