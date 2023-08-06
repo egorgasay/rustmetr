@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn test_update_unknown_metric_error() {
-        let mut repo = MockRepositoryAbstract::new();
+        let repo = MockRepositoryAbstract::new();
         let usecase = UseCase::new(&repo);
 
         match usecase.update("qfg".to_string(), "name".to_string(), "1.33".to_string()) {
@@ -149,7 +149,7 @@ mod tests {
     fn test_update_ok_gauge() {
         let mut repo = MockRepositoryAbstract::new();
 
-        repo.expect_set().return_once(move |name, value | Ok(()) );
+        repo.expect_set().return_once(move |_, _ | Ok(()) );
          
         let usecase = UseCase::new(&repo);
         
@@ -165,7 +165,7 @@ mod tests {
     fn test_update_ok_counter() {
         let mut repo = MockRepositoryAbstract::new();
 
-        repo.expect_inc().return_once(move |name, value | Ok(()) );
+        repo.expect_inc().return_once(move |_, _ | Ok(()) );
 
         let usecase = UseCase::new(&repo);
 
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn test_update_bad_format_counter() {
-        let mut repo = MockRepositoryAbstract::new();
+        let repo = MockRepositoryAbstract::new();
         let usecase = UseCase::new(&repo);
 
         match usecase.update("counter".to_string(), "name".to_string(), "1wfe".to_string()) {
@@ -201,7 +201,7 @@ mod tests {
     fn test_get_metric() {
         let mut repo = MockRepositoryAbstract::new();
 
-        repo.expect_get().return_once(move |name | Ok(3.534) );
+        repo.expect_get().return_once(move |_ | Ok(3.534) );
 
         let usecase = UseCase::new(&repo);
         match usecase.get_metric("name".to_string()) {
@@ -209,7 +209,7 @@ mod tests {
                 assert_eq!(f, 3.534);
             },
             Err(err) => {
-                panic!("no error was expected")
+                panic!("no error was expected {:?}", err)
             }
         }
     }

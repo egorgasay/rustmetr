@@ -19,9 +19,13 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
     env::set_var("RUST_BACKTRACE", "1");
     env::set_var("RUST_LOG", "actix_web=debug");
 
-    env_logger::try_init();
+    match env_logger::try_init(){
+        Ok(_) => (),
+        Err(e) => {
+            panic!("{}", e);
+        }
+    };
 
-    let http_connection = HttpConnection {};
     let repo = &Storage::new();
 
     let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };

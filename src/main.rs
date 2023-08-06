@@ -1,10 +1,5 @@
 use rustmetric::adapters::{
     self,
-    api::controllers::get_metric,
-    api::app_state::AppState,
-    spi::{
-        http::{http_connection::HttpConnection},
-    },
 };
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder,
