@@ -1,6 +1,5 @@
 pub enum UpdateError {
     UnknownMetric,
-    NotFound,
     BadFormat,
     ProblemStorage
 }
@@ -8,5 +7,6 @@ pub enum UpdateError {
 #[derive(Debug)]
 pub enum GetMetricError {
     NotFound,
-    ProblemStorage
+    ProblemStorage,
+    UnknownMetric
 }

@@ -18,18 +18,34 @@ impl<'a> UseCase<'_> {
         }
     }
 
-    pub fn get_metric(&self, metric: String) -> Result<f32, GetMetricError> {
-        match self.repository.get(metric) {
-            Ok(value) => Ok(value),
-            Err(err) => match err {
-                storage::GetError::NotFound => Err(GetMetricError::NotFound),
-                storage::GetError::Internal => Err(GetMetricError::ProblemStorage),
-            },
+    pub fn get_metric(&self, metric_type: String, name: String) -> Result<f64, GetMetricError> {
+        match metric_type.as_str() {
+            "gauge" => {
+                match self.repository.get_gauge(name) {
+                    Ok(value) => Ok(value),
+                    Err(err) => match err {
+                        storage::GetError::NotFound => Err(GetMetricError::NotFound),
+                        storage::GetError::Internal => Err(GetMetricError::ProblemStorage),
+                    },
+                }
+            }
+            "counter" => {
+                match self.repository.get_counter(name) {
+                    Ok(value) => Ok(value as f64),
+                    Err(err) => match err {
+                        storage::GetError::NotFound => Err(GetMetricError::NotFound),
+                        storage::GetError::Internal => Err(GetMetricError::ProblemStorage),
+                    },
+                }
+            }
+            _ => {
+                Err(GetMetricError::UnknownMetric)
+            }
         }
     }
 
-    fn update_gauge(&self, metric: String, value: f32) -> Result<(), UpdateError> {
-        match self.repository.set(metric, value) {
+    fn update_gauge(&self, metric: String, value: f64) -> Result<(), UpdateError> {
+        match self.repository.set_gauge(metric, value) {
             Err(err) => {
                 match err {
                     storage::SetError::Internal => Err(UpdateError::ProblemStorage)
@@ -39,8 +55,8 @@ impl<'a> UseCase<'_> {
         }
     }
 
-    fn update_counter(&self, metric: String, value: i32) -> Result<(), UpdateError> {
-        match self.repository.inc(metric, value) {
+    fn update_counter(&self, metric: String, value: i64) -> Result<(), UpdateError> {
+        match self.repository.inc_counter(metric, value) {
             Err(err) => {
                 match err {
                     storage::IncError::Internal => Err(UpdateError::ProblemStorage),
@@ -53,8 +69,8 @@ impl<'a> UseCase<'_> {
     pub fn update(&self, metric: String, name: String, value: String) -> Result<(), UpdateError> {
         match metric.as_str() {
             "gauge" => {
-                let val: f32;
-                match value.parse::<f32>() {
+                let val: f64;
+                match value.parse::<f64>() {
                     Ok(n) => val = n,
                     Err(_e) => {
                         return Err(UpdateError::BadFormat);
@@ -62,13 +78,13 @@ impl<'a> UseCase<'_> {
                 };
 
                 match self.update_gauge(name, val) {
-                    Err(err) => return Err(err),
-                    Ok(_) => return Ok(()),
-                };
+                    Err(err) => Err(err),
+                    Ok(_) => Ok(()),
+                }
             },
             "counter" => {
-                let val: i32;
-                match value.parse::<i32>() {
+                let val: i64;
+                match value.parse::<i64>() {
                     Ok(n) => val = n,
                     Err(_e) => {
                         return Err(UpdateError::BadFormat);
@@ -76,9 +92,9 @@ impl<'a> UseCase<'_> {
                 };
 
                 match self.update_counter(name, val) {
-                    Err(err) => return Err(err),
-                    Ok(_) =>  return Ok(()),
-                };
+                    Err(err) => Err(err),
+                    Ok(_) => Ok(()),
+                }
             },
             &_ => {
                 return Err(UpdateError::UnknownMetric);
