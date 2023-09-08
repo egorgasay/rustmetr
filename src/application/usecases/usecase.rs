@@ -113,7 +113,7 @@ mod tests {
     fn test_update_storage_error() {
         let mut repo = MockRepositoryAbstract::new();
 
-        repo.expect_set().return_once(move |_name, _value | Err(storage::SetError::Internal));
+        repo.expect_set_gauge().return_once(move |_name, _value | Err(storage::SetError::Internal));
          
         let usecase = UseCase::new(&repo);
         
