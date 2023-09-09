@@ -74,7 +74,10 @@ impl RepositoryAbstract for Storage {
         match self.counter.write(){
             Ok(mut data) => {
                 log!(Level::Info, "inc counter: {}, with value: {}", name, value);
-                *data.entry(name).or_insert(value) += value;
+                data.
+                    entry(name).
+                    and_modify(|v| *v += value).
+                    or_insert(value);
                 Ok(())
             }
             Err(err) => {

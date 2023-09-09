@@ -48,7 +48,7 @@ impl From<ServiceError> for ErrorResponse {
                 error: err.to_string(),
             },
             ServiceError::BadRequest(m) => ErrorResponse{
-                status_code: StatusCode::BAD_REQUEST,
+                status_code: StatusCode::NOT_FOUND,
                 error: m.to_string(),
             },
             ServiceError::InternalServerError => ErrorResponse{
@@ -72,6 +72,10 @@ impl ErrorResponse {
             },
             403 => ErrorResponse {
                 status_code: StatusCode::FORBIDDEN,
+                error: e.get_error_message(),
+            },
+            404 => ErrorResponse {
+                status_code: StatusCode::NOT_FOUND,
                 error: e.get_error_message(),
             },
             _ => ErrorResponse {

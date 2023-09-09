@@ -1,5 +1,4 @@
 pub mod controllers;
-pub mod mappers;
 pub mod payloads;
 pub mod presenters;
 pub mod app_state;
