@@ -40,7 +40,7 @@ impl From<ServiceError> for ErrorResponse {
     fn from(err: ServiceError) -> ErrorResponse {
         match err {
             ServiceError::NotFound => ErrorResponse{
-                status_code: StatusCode::BAD_REQUEST,
+                status_code: StatusCode::NOT_FOUND,
                 error: err.to_string(),
             },
             ServiceError::Unauthorized => ErrorResponse{
@@ -48,7 +48,7 @@ impl From<ServiceError> for ErrorResponse {
                 error: err.to_string(),
             },
             ServiceError::BadRequest(m) => ErrorResponse{
-                status_code: StatusCode::NOT_FOUND,
+                status_code: StatusCode::BAD_REQUEST,
                 error: m.to_string(),
             },
             ServiceError::InternalServerError => ErrorResponse{
