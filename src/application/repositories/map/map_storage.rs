@@ -86,4 +86,34 @@ impl RepositoryAbstract for Storage {
             }
         }
     }
+
+    fn get_all_metrics(&self) -> Result<Vec<(String, f64)>, RepositoryError> {
+        let mut metrics: Vec<(String, f64)> = vec![];
+
+        match self.gauge.read() {
+            Ok(data) => {
+                for (name, value) in data.iter().collect::<Vec<(&String, &f64)>>() {
+                    metrics.push((name.clone(), *value));
+                }
+            }
+            Err(e) => {
+                log!(Level::Error, "get_all_metrics: {}", e.to_string());
+                return Err(RepositoryError::Internal);
+            }
+        }
+
+        match self.counter.read() {
+            Ok(data) => {
+                for (name, value) in data.iter().collect::<Vec<(&String, &i64)>>() {
+                    metrics.push((name.clone(), *value as f64));
+                }
+            }
+            Err(e) => {
+                log!(Level::Error, "get_all_metrics: {}", e.to_string());
+                return Err(RepositoryError::Internal);
+            }
+        }
+
+        Ok(metrics)
+    }
 }

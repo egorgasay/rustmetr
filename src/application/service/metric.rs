@@ -109,6 +109,13 @@ impl<'a> MetricService<'_> {
             }
         }
     }
+
+    pub fn get_all_metrics(&self) -> Result<String, ServiceError> {
+        match self.repository.get_all_metrics() {
+            Ok(m) => Ok(format!("{:?}", m)),
+            Err(err) => Err(ServiceError::from(err)),
+        }
+    }
 }
 
 #[cfg(test)]
