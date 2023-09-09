@@ -7,7 +7,7 @@ use crate::adapters::{
 use actix_web::{dev::Server};
 use actix_web::{web, App, HttpServer};
 use crate::application::{
-    usecases::usecase::UseCase,
+    service::metric::MetricService,
     repositories::map::map_storage::Storage
 };
 
@@ -25,7 +25,7 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
     let repo = &Storage::new();
 
     let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
-    let logic = UseCase::new(static_reference);
+    let logic = MetricService::new(static_reference);
     let data = web::Data::new(AppState {
         app_name: String::from("Animal Facts API"),
         logic: logic,

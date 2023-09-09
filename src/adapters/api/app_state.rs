@@ -1,6 +1,6 @@
-use crate:: application::usecases::usecase::UseCase;
+use crate:: application::service::metric::MetricService;
 
 pub struct AppState<'a> {
     pub app_name: String,
-    pub logic: UseCase<'a>,
+    pub logic: MetricService<'a>,
 }

@@ -4,11 +4,11 @@
 use crate::{
     application::{repositories::repository_abstract::RepositoryAbstract,
     },
-    errors::storage::*,
 };
 use std::collections::HashMap;
 use std::sync::RwLock;
 use log::{Level, log};
+use crate::application::repositories::errors::RepositoryError;
 
 // Структура для хранения данных
 pub struct Storage {
@@ -26,37 +26,37 @@ impl Storage {
 }
 
 impl RepositoryAbstract for Storage {
-    fn get_counter(&self, metric: String) -> Result<i64, GetError> {
-        match self.counter.read() {
-            Ok(data) => {
-                match data.get(&metric.to_owned()) {
-                    Some(value) => Ok(*value),
-                    None => Err(GetError::NotFound),
-                }
-            },
-            Err(err) => {
-                log!(Level::Error, "error while getting counter: {}", err.to_string());
-                Err(GetError::Internal)
-            },
-        }
-    }
-
-    fn get_gauge(&self, metric: String) -> Result<f64, GetError> {
+    fn get_gauge(&self, metric: String) -> Result<f64, RepositoryError> {
         match self.gauge.read() {
             Ok(data) => {
                 match data.get(&metric.to_owned()) {
                     Some(value) => Ok(*value),
-                    None => Err(GetError::NotFound),
+                    None => Err(RepositoryError::NotFound),
                 }
             },
             Err(err) => {
                 log!(Level::Error, "error while getting gauge: {}", err.to_string());
-                Err(GetError::Internal)
+                Err(RepositoryError::Internal)
             },
         }
     }
 
-    fn set_gauge(&self, name: String, value: f64) -> Result<(), SetError> {
+    fn get_counter(&self, metric: String) -> Result<i64, RepositoryError> {
+        match self.counter.read() {
+            Ok(data) => {
+                match data.get(&metric.to_owned()) {
+                    Some(value) => Ok(*value),
+                    None => Err(RepositoryError::NotFound),
+                }
+            },
+            Err(err) => {
+                log!(Level::Error, "error while getting counter: {}", err.to_string());
+                Err(RepositoryError::Internal)
+            },
+        }
+    }
+
+    fn set_gauge(&self, name: String, value: f64) -> Result<(), RepositoryError> {
         log!(Level::Info, "set gauge: {}, value: {}", name, value);
         match self.gauge.write() {
             Ok(mut data) => {
@@ -65,12 +65,12 @@ impl RepositoryAbstract for Storage {
             }
             Err(err) => {
                 log!(Level::Error, "error while setting gauge: {}", err.to_string());
-                Err(SetError::Internal)
+                Err(RepositoryError::Internal)
             }
         }
     }
 
-    fn inc_counter(&self, name: String, value: i64) -> Result<(), IncError> {
+    fn inc_counter(&self, name: String, value: i64) -> Result<(), RepositoryError> {
         match self.counter.write(){
             Ok(mut data) => {
                 log!(Level::Info, "inc counter: {}, with value: {}", name, value);
@@ -79,7 +79,7 @@ impl RepositoryAbstract for Storage {
             }
             Err(err) => {
                 log!(Level::Error, "inc counter: {}", err.to_string());
-                Err(IncError::Internal)
+                Err(RepositoryError::Internal)
             }
         }
     }

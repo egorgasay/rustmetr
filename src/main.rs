@@ -4,7 +4,7 @@ use rustmetric::adapters::{
 
 use actix_web::{web, App, HttpServer,
     middleware::Logger};
-use rustmetric::application::usecases::usecase::UseCase;
+use rustmetric::application::service::metric::MetricService;
 use rustmetric::application::repositories::map::map_storage::Storage;
 
 #[actix_web::main]
@@ -13,7 +13,7 @@ async fn main() -> std::io::Result<()> {
 
     let storage = Storage::new();
    let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(storage))) };
-   let logic = web::Data::new(UseCase::new(static_reference));
+   let logic = web::Data::new(MetricService::new(static_reference));
 
    println!("started on 8080");
    HttpServer::new(move || {
