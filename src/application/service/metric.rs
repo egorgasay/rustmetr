@@ -110,9 +110,9 @@ impl<'a> MetricService<'_> {
         }
     }
 
-    pub fn get_all_metrics(&self) -> Result<String, ServiceError> {
+    pub fn get_all_metrics(&self) -> Result<Vec<(String, f64)>, ServiceError> {
         match self.repository.get_all_metrics() {
-            Ok(m) => Ok(format!("{:?}", m)),
+            Ok(m) => Ok(m),
             Err(err) => Err(ServiceError::from(err)),
         }
     }

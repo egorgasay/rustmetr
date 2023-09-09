@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RustMetr</title>
+</head>
+<body>
+<p>
+    {% for metric in metrics %}
+        {{loop.index}}. {{metric.0}}: {{metric.1}} <br>
+    {% endfor %}
+</p>
+</body>
+</html>

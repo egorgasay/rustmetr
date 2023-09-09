@@ -4,6 +4,7 @@ use rustmetric::adapters::{
 
 use actix_web::{web, App, HttpServer,
     middleware::Logger};
+use tera::Tera;
 use rustmetric::application::service::metric::MetricService;
 use rustmetric::application::repositories::map::map_storage::Storage;
 
@@ -17,7 +18,10 @@ async fn main() -> std::io::Result<()> {
 
    println!("started on 8080");
    HttpServer::new(move || {
-       App::new().app_data(logic.clone())
+       let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/*")).unwrap();
+       App::new().
+           app_data(web::Data::new(tera)).
+           app_data(logic.clone())
            .wrap(Logger::default()).configure(adapters::api::routes::routes)
    })
    .bind("127.0.0.1:8080")?

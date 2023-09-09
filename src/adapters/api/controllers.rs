@@ -3,7 +3,9 @@ use crate::application::service::metric::MetricService;
 
 
 use actix_web::{get, post, web, HttpResponse, Responder};
+use log::{Level, log};
 use crate::adapters::api::error_presenter::ErrorResponse;
+use crate::application::service::errors::ServiceError;
 
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
@@ -39,9 +41,19 @@ async fn update(logic: web::Data<MetricService<'_>>, path: web::Path<(String, St
 }
 
 #[get("/")]
-async fn get_all(logic: web::Data<MetricService<'_>>) -> impl Responder {
+async fn get_all(tmpl: web::Data<tera::Tera>, logic: web::Data<MetricService<'_>>) -> impl Responder {
     match logic.get_all_metrics() {
-        Ok(value) => HttpResponse::Ok().body(value.to_string()),
+        Ok(metrics) => {
+            let mut ctx = tera::Context::new();
+            ctx.insert("metrics", &metrics);
+            match tmpl.render("index.html", &ctx) {
+                Ok(html) => HttpResponse::Ok().body(html),
+                Err(err) => {
+                    log!(Level::Error, "error while rendering template: {}", err.to_string());
+                    HttpResponse::from_error(ErrorResponse::from(ServiceError::InternalServerError))
+                },
+            }
+        },
         Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
     }
 }
