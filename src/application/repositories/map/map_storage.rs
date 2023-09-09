@@ -35,7 +35,7 @@ impl RepositoryAbstract for Storage {
                 }
             },
             Err(err) => {
-                log!(Level::Error, "error while getting gauge: {}", err.to_string());
+                log!(Level::Error, "get_gauge: {}", err.to_string());
                 Err(RepositoryError::Internal)
             },
         }
@@ -50,7 +50,7 @@ impl RepositoryAbstract for Storage {
                 }
             },
             Err(err) => {
-                log!(Level::Error, "error while getting counter: {}", err.to_string());
+                log!(Level::Error, "get_counter: {}", err.to_string());
                 Err(RepositoryError::Internal)
             },
         }
@@ -64,7 +64,7 @@ impl RepositoryAbstract for Storage {
                 Ok(())
             }
             Err(err) => {
-                log!(Level::Error, "error while setting gauge: {}", err.to_string());
+                log!(Level::Error, "set_gauge: {}", err.to_string());
                 Err(RepositoryError::Internal)
             }
         }
