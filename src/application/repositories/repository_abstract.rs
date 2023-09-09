@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 #[cfg(test)]
 use mockall::{predicate::*, *};
-use crate::application::repositories::errors::RepositoryError;
+use crate::application::repositories::error::RepositoryError;
 
 #[cfg_attr(test, automock)]
 #[async_trait(?Send)]

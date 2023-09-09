@@ -12,7 +12,7 @@ use rustmetric::application::repositories::map::map_storage::Storage;
 async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    let storage = Storage::new();
+    let storage = Storage::default();
    let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(storage))) };
    let logic = web::Data::new(MetricService::new(static_reference));
 

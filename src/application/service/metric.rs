@@ -2,7 +2,7 @@ use log::{Level, log};
 use crate::{
     application::repositories::repository_abstract::RepositoryAbstract,
 };
-use crate::application::repositories::errors::RepositoryError;
+use crate::application::repositories::error::RepositoryError;
 use crate::application::service::errors::ServiceError;
 
 #[derive(Clone)]

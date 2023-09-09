@@ -8,7 +8,7 @@ use crate::{
 use std::collections::HashMap;
 use std::sync::RwLock;
 use log::{Level, log};
-use crate::application::repositories::errors::RepositoryError;
+use crate::application::repositories::error::RepositoryError;
 
 // Структура для хранения данных
 pub struct Storage {
@@ -16,8 +16,8 @@ pub struct Storage {
     pub counter: RwLock<HashMap<String, i64>>,
 }
 
-impl Storage {
-    pub fn new() -> Self {
+impl Default for Storage {
+    fn default() -> Self {
         Storage {
             gauge: RwLock::new(HashMap::new()),
             counter: RwLock::new(HashMap::new()),

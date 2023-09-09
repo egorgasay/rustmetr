@@ -22,7 +22,7 @@ pub fn server(listener: TcpListener, db_name: &str) -> Result<Server, std::io::E
         }
     };
 
-    let repo = &Storage::new();
+    let repo = &Storage::default();
 
     let static_reference: &'static Storage = unsafe { std::mem::transmute(Box::leak(Box::new(repo))) };
     let logic = MetricService::new(static_reference);

@@ -1,5 +1,5 @@
 use derive_more::Display;
-use crate::application::repositories::errors::RepositoryError;
+use crate::application::repositories::error::RepositoryError;
 
 #[derive(Debug, Display)]
 pub enum ServiceError {

@@ -2,13 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RustMetr</title>
+    <title>Metrics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
 </head>
 <body>
-<p>
-    {% for metric in metrics %}
-        {{loop.index}}. {{metric.0}}: {{metric.1}} <br>
-    {% endfor %}
-</p>
+<br>
+<div class="container">
+    <h1>Metrics</h1>
+    <table id="data" class="table table-striped">
+        <thead>
+        <tr>
+            <th style="color: #000000">Name</th>
+            <th style="color: #000000">Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for metric in metrics %}
+        <tr>
+            <td style="color: #000000">{{ metric.0 }}</td>
+
+            <td style="color: #000000">{{ metric.1 }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#data').DataTable({
+            columns: null,
+            "aaSorting": []
+        });
+    });
+</script>
 </body>
 </html>
