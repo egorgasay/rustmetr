@@ -26,10 +26,10 @@ impl Default for Storage {
 }
 
 impl RepositoryAbstract for Storage {
-    fn get_gauge(&self, metric: String) -> Result<f64, RepositoryError> {
+    fn get_gauge(&self, metric: &String) -> Result<f64, RepositoryError> {
         match self.gauge.read() {
             Ok(data) => {
-                match data.get(&metric.to_owned()) {
+                match data.get(metric) {
                     Some(value) => Ok(*value),
                     None => Err(RepositoryError::NotFound),
                 }
@@ -41,10 +41,10 @@ impl RepositoryAbstract for Storage {
         }
     }
 
-    fn get_counter(&self, metric: String) -> Result<i64, RepositoryError> {
+    fn get_counter(&self, metric: &String) -> Result<i64, RepositoryError> {
         match self.counter.read() {
             Ok(data) => {
-                match data.get(&metric.to_owned()) {
+                match data.get(metric) {
                     Some(value) => Ok(*value),
                     None => Err(RepositoryError::NotFound),
                 }

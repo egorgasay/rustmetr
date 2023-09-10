@@ -4,6 +4,7 @@ use crate::{
 };
 use crate::application::repositories::error::RepositoryError;
 use crate::application::service::errors::ServiceError;
+use crate::domain::entity::{Metric};
 
 #[derive(Clone)]
 pub struct MetricService<'a> {
@@ -18,11 +19,17 @@ impl<'a> MetricService<'_> {
         }
     }
 
-    pub fn get_metric(&self, metric_type: String, name: String) -> Result<f64, ServiceError> {
+    pub fn get_metric(&self, metric_type: String, name: String) -> Result<Metric, ServiceError> {
         match metric_type.as_str() {
             "gauge" => {
-                match self.repository.get_gauge(name) {
-                    Ok(value) => Ok(value),
+                match self.repository.get_gauge(&name) {
+                    Ok(value) => Ok(
+                        Metric::new(
+                            name.to_string(),
+                            metric_type,
+                            Some(value), None
+                        )
+                    ),
                     Err(err) => match err {
                         RepositoryError::NotFound => Err(ServiceError::NotFound),
                         RepositoryError::Internal => Err(ServiceError::InternalServerError),
@@ -30,8 +37,14 @@ impl<'a> MetricService<'_> {
                 }
             }
             "counter" => {
-                match self.repository.get_counter(name) {
-                    Ok(value) => Ok(value as f64),
+                match self.repository.get_counter(&name) {
+                    Ok(delta) => Ok(
+                        Metric::new(
+                            name.to_string(),
+                            metric_type,
+                            None, Some(delta)
+                        )
+                    ),
                     Err(err) => match err {
                         RepositoryError::NotFound => Err(ServiceError::NotFound),
                         RepositoryError::Internal => Err(ServiceError::InternalServerError),
@@ -74,7 +87,21 @@ impl<'a> MetricService<'_> {
         }
     }
 
-    pub fn update(&self, metric: String, name: String, value: String) -> Result<(), ServiceError> {
+    pub fn update(&self, metric: Metric) -> Result<(), ServiceError> {
+        match metric.mtype.as_str() {
+            "gauge" => {
+                self.update_gauge(metric.name, metric.value.unwrap_or_default())
+            }
+            "counter" => {
+                self.update_counter(metric.name, metric.delta.unwrap_or_default())
+            }
+            _ => {
+                Err(ServiceError::BadRequest("unknown metric".to_string()))
+            }
+        }
+    }
+
+    pub fn update_raw(&self, metric: String, name: String, value: String) -> Result<(), ServiceError> {
         match metric.as_str() {
             "gauge" => {
                 let val;
@@ -85,10 +112,7 @@ impl<'a> MetricService<'_> {
                     },
                 };
 
-                match self.update_gauge(name, val) {
-                    Err(err) => Err(err),
-                    Ok(_) => Ok(()),
-                }
+                self.update(Metric::new(name, metric, Some(val), None))
             },
             "counter" => {
                 let val: i64;
@@ -99,10 +123,7 @@ impl<'a> MetricService<'_> {
                     },
                 };
 
-                match self.update_counter(name, val) {
-                    Err(err) => Err(err),
-                    Ok(_) => Ok(()),
-                }
+                self.update(Metric::new(name, metric, None, Some(val)))
             },
             &_ => {
                 Err(ServiceError::BadRequest("unknown metric".to_string()))

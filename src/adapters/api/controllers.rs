@@ -5,6 +5,9 @@ use crate::application::service::metric::MetricService;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use log::{Level, log};
 use crate::adapters::api::error_presenter::ErrorResponse;
+use crate::adapters::spi::http::http_mappers::HTTPMapper;
+use crate::adapters::spi::http::http_models::{MetricAPI};
+use crate::application::mappers::http_mapper::HttpMapper;
 use crate::application::service::errors::ServiceError;
 
 
@@ -12,7 +15,9 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.
         service(get_metric).
         service(update).
-        service(get_all);
+        service(get_all).
+        service(get_metric_json).
+        service(update_json);
 }
 
 #[get("/value/{type}/{name}")]
@@ -22,7 +27,15 @@ async fn get_metric(logic: web::Data<MetricService<'_>>, p: web::Path<(String, S
     let key = path.1;
 
     match logic.get_metric(metric_type, key) {
-        Ok(value) => HttpResponse::Ok().body(value.to_string()),
+        Ok(m) => HttpResponse::Ok().body(m.value.unwrap_or_default().to_string()),
+        Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
+    }
+}
+
+#[post("/value")]
+async fn get_metric_json(logic: web::Data<MetricService<'_>>, metric: web::Json<MetricAPI>) -> HttpResponse {
+    match logic.get_metric(metric.mtype.clone(), metric.id.clone()) {
+        Ok(m) => HttpResponse::Ok().json(HTTPMapper::to_http(m)),
         Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
     }
 }
@@ -34,7 +47,27 @@ async fn update(logic: web::Data<MetricService<'_>>, path: web::Path<(String, St
     let key = p.1;
     let value = p.2;
 
-    match logic.update(metric_type, key, value) {
+    match logic.update_raw(metric_type, key, value) {
+        Ok(_) => HttpResponse::Ok().body("completed successfully"),
+        Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
+    }
+}
+
+#[post("/update")]
+async fn update_json(logic: web::Data<MetricService<'_>>, metric: web::Json<MetricAPI>) -> impl Responder {
+    let mut value= 0.0;
+    if let Some(v) = metric.value {
+        value = v;
+    }
+
+    let mut delta = 0.0;
+    if let Some(d) = metric.delta {
+        delta = d as f64;
+    }
+
+    let m = HTTPMapper::to_entity(metric);
+
+    match logic.update(m) {
         Ok(_) => HttpResponse::Ok().body("completed successfully"),
         Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
     }
