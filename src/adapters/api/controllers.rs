@@ -26,8 +26,16 @@ async fn get_metric(logic: web::Data<MetricService<'_>>, p: web::Path<(String, S
     let metric_type = path.0;
     let key = path.1;
 
-    match logic.get_metric(metric_type, key) {
-        Ok(m) => HttpResponse::Ok().body(m.value.unwrap_or_default().to_string()),
+    match logic.get_metric(metric_type.clone(), key) {
+        Ok(m) => {
+            let body: String;
+            match metric_type.as_str() {
+                "gauge" => body = m.value.unwrap_or_default().to_string(),
+                "counter" => body = m.delta.unwrap_or_default().to_string(),
+                _ => return HttpResponse::from_error(ErrorResponse::from(ServiceError::BadRequest("unknown metric".to_string())))
+            }
+            HttpResponse::Ok().body(body)
+        },
         Err(err) => HttpResponse::from_error(ErrorResponse::from(err)),
     }
 }
