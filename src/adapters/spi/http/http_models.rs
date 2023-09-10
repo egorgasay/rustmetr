@@ -1,13 +1,9 @@
+use serde::{Deserialize, Serialize};
 
-
-// #[derive(Serialize, Deserialize, Debug)]
-// pub struct CatFactsApiModel {
-//     pub current_page: i32,
-//     pub data: Vec<CatFactApiModel>,
-// }
-//
-// #[derive(Serialize, Deserialize, Debug)]
-// pub struct CatFactApiModel {
-//     pub fact: String,
-//     pub length: i32,
-// }
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Metrics {
+    pub id: String,
+    pub mtype: String,
+    pub value: f64,
+    pub delta: i64,
+}
